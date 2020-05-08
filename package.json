@@ -1,0 +1,77 @@
+{
+  "name": "@dxos/browser-runner",
+  "version": "0.0.1",
+  "description": "CLI to run JavaScript files into a headless browser.",
+  "homepage": "https://github.com/dxos/browser-runner#readme",
+  "bugs": {
+    "url": "https://github.com/dxos/browser-runner/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dxos/browser-runner.git"
+  },
+  "license": "GPL-3.0",
+  "files": [
+    "dist",
+    "index.js"
+  ],
+  "bin": {
+    "browser-runner": "bin/cli.js"
+  },
+  "main": "index.js",
+  "browser": "dist/index.js",
+  "scripts": {
+    "build": "npm run clean && npm run build:babel",
+    "build:babel": "babel ./src --out-dir ./dist --ignore \"**/*.test.js\" --source-maps",
+    "clean": "del-cli dist",
+    "lint": "semistandard 'src/**/*.js'",
+    "prepublishOnly": "npm run build && npm run test",
+    "test": "jest --verbose --passWithNoTests src",
+    "posttest": "npm run lint"
+  },
+  "browserslist": [
+    "> 5%"
+  ],
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "babel-loader": "^8.1.0",
+    "debug": "^4.1.1",
+    "dotenv-webpack": "^1.7.0",
+    "get-port": "^5.1.1",
+    "html-webpack-plugin": "^4.3.0",
+    "http-server": "^0.12.3",
+    "puppeteer": "^3.0.4",
+    "serve-handler": "^6.1.2",
+    "source-map-support": "^0.5.12",
+    "tempy": "^0.5.0",
+    "webpack": "^4.43.0",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-export-default-from": "^7.5.2",
+    "@babel/preset-env": "^7.4.5",
+    "babel-eslint": "^10.0.2",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "babel-plugin-inline-import": "^3.0.0",
+    "cpy-cli": "^2.0.0",
+    "del-cli": "^3.0.0",
+    "jest": "^24.5.0",
+    "semistandard": "^14.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "semistandard": {
+    "parser": "babel-eslint",
+    "env": [
+      "jest",
+      "node",
+      "browser"
+    ]
+  }
+}
