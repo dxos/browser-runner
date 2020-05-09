@@ -54,7 +54,13 @@ Important: First time the execution will take longer since it has to download th
 
 `browser-runner` cannot know when your script finish the execution.
 
-If you want to exit the process at some point in your script runs or throw an unhandled `Error`:
+If you want to exit the process at some point in your script runs:
+
+```javascript
+console.log('BROWSER_RUNNER_EXIT')
+```
+
+ Or throw an unhandled `Error`
 
 ### Environment variables
 
