@@ -57,10 +57,10 @@ Important: First time the execution will take longer since it has to download th
 If you want to exit the process at some point in your script runs:
 
 ```javascript
-console.log('BROWSER_RUNNER_EXIT')
+process.exit(code) // 0 success 1 error
 ```
 
- Or throw an unhandled `Error`
+Or throw an unhandled `Error`
 
 ### Environment variables
 

@@ -6,6 +6,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import InjectPlugin from 'webpack-inject-plugin';
 import tempy from 'tempy';
 
 const resolve = async (file) => {
@@ -45,6 +46,17 @@ export async function mergeWebpackConfig (options) {
       new Dotenv({
         path: envPath,
         systemvars: true
+      }),
+      new InjectPlugin(() => {
+        return `
+        if (!window.process) {
+          window.process = process || {}
+        }
+
+        window.process.exit = (code = 0) => {
+          window.exit = code
+        }
+        `;
       }),
       new HtmlWebpackPlugin({
         templateContent: `

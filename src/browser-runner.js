@@ -26,6 +26,8 @@ export async function run (options = {}) {
   const { port = 0, watch, puppeteerOptions = {} } = options;
 
   const config = await mergeWebpackConfig(options);
+  const server = await createServer(config.output.path, port);
+  const url = `http://localhost:${server.address().port}`;
 
   let browser;
   let page;
@@ -55,16 +57,27 @@ export async function run (options = {}) {
       text = text.join(' ');
     }
 
-    if (text.includes('BROWSER_RUNNER_EXIT')) {
-      if (!watch) {
-        shutdown();
-      }
-    } else {
-      console.log(text);
-    }
+    console.log(text);
   });
 
-  const server = await createServer(config.output.path, port);
+  if (watch) {
+    console.log(`Running on: ${url}\n\n`);
+  } else {
+    page
+      .waitForFunction('window.exit !== undefined')
+      .then(() => {
+        return page.evaluate(() => {
+          return window.exit;
+        });
+      })
+      .then(code => {
+        shutdown(code);
+      })
+      .catch(err => {
+        console.error(err);
+        shutdown(1);
+      });
+  }
 
   let firstRun = true;
 
@@ -83,10 +96,6 @@ export async function run (options = {}) {
 
     if (firstRun) {
       firstRun = false;
-      const url = `http://localhost:${server.address().port}`;
-      if (watch) {
-        console.log(`Running on: ${url}\n\n`);
-      }
       page.goto(url).catch(err => {
         console.error(err);
         shutdown(1);
