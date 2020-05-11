@@ -31,7 +31,7 @@ export async function readWebpackConfig (configPath = 'webpack.config.js') {
 export async function mergeWebpackConfig (options) {
   const { src = './src/index.js', env = './.env', watch = false, userConfig = {} } = options;
 
-  const envPath = (await resolve(env) || path.resolve(__dirname, '../.env.example'));
+  const envPath = (await resolve(env) || path.resolve(__dirname, '../.env.default'));
 
   return {
     mode: 'development',

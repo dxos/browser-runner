@@ -14,7 +14,8 @@
   "files": [
     "bin",
     "dist",
-    "index.js"
+    "index.js",
+    ".env.default"
   ],
   "bin": {
     "browser-runner": "bin/cli.js"
