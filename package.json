@@ -12,6 +12,7 @@
   },
   "license": "GPL-3.0",
   "files": [
+    "bin",
     "dist",
     "index.js"
   ],
