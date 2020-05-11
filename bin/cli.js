@@ -10,7 +10,7 @@ const yargs = require('yargs');
 const { run, readWebpackConfig } = require('..');
 
 const argv = yargs
-  .usage('$0 <file> [options] [-- puppeteerOptions]', 'runs the script', (yargs) => {
+  .usage('$0 <file> [options] [puppeteerOptions]', 'runs the script', (yargs) => {
     yargs
       .positional('file', {
         describe: 'the file to run',
@@ -41,12 +41,14 @@ const argv = yargs
   .argv;
 
 (async () => {
+  const { file, watch, port, env, config, ...puppeteerOptions } = argv;
+
   await run({
-    src: path.resolve(argv.file),
-    watch: argv.watch,
-    userConfig: await readWebpackConfig(argv.config),
-    port: argv.port,
-    env: argv.env,
-    puppeteerOptions: argv._.length > 0 && yargs.parse(argv._)
+    src: path.resolve(file),
+    watch,
+    userConfig: await readWebpackConfig(config),
+    port,
+    env,
+    puppeteerOptions
   });
 })();

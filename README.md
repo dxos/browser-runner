@@ -18,7 +18,7 @@ $ npm install -g @dxos/browser-runner
 ```
 $ browser-runner --help
 
-cli.js <file> [options] [-- puppeteerOptions]
+cli.js <file> [options] [puppeteerOptions]
 
 runs the script
 
@@ -45,7 +45,7 @@ $ browser-runner script.js
 You can test with Firefox using the puppeteer option `product`.
 
 ```
-$ browser-runner script.js -- --product firefox
+$ browser-runner script.js --product firefox
 ```
 
 Important: First time the execution will take longer since it has to download the firefox browser.

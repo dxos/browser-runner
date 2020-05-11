@@ -17,7 +17,7 @@ function getRevision (browserFetcher) {
   }
 }
 
-export async function downloadBrowser ({ product }) {
+export async function downloadBrowser ({ product = process.env.PUPPETEER_PRODUCT }) {
   const browserFetcher = puppeteer.createBrowserFetcher({
     product
   });
