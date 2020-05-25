@@ -7,7 +7,7 @@ import handler from 'serve-handler';
 import http from 'http';
 import puppeteer from 'puppeteer';
 
-import { mergeWebpackConfig } from './webpack-config';
+import { mergeWebpackConfig } from './config';
 import { downloadBrowser } from './download-browser';
 
 async function createServer (outputPath, port) {
@@ -22,11 +22,13 @@ async function createServer (outputPath, port) {
   return server;
 }
 
-export async function run (options = {}) {
-  const { port = 0, watch, puppeteerOptions = {} } = options;
+const noop = () => {};
 
-  const config = await mergeWebpackConfig(options);
-  const server = await createServer(config.output.path, port);
+export async function run (options = {}) {
+  const { port = 0, watch, beforeAll = noop, afterAll = noop, onMessage = noop, puppeteerOptions = {} } = options;
+
+  const webpackConfig = await mergeWebpackConfig(options);
+  const server = await createServer(webpackConfig.output.path, port);
   const url = `http://localhost:${server.address().port}`;
 
   let browser;
@@ -36,17 +38,16 @@ export async function run (options = {}) {
     await downloadBrowser(puppeteerOptions);
     browser = await puppeteer.launch(puppeteerOptions);
     page = await browser.newPage();
+    await beforeAll();
   } catch (err) {
-    console.error(err);
-    shutdown(1);
+    shutdown(1, err);
   }
 
-  page.on('error', async err => {
-    console.error(err);
-    shutdown(1);
+  page.on('error', err => {
+    shutdown(1, err);
   });
 
-  page.on('pageerror', async err => {
+  page.on('pageerror', err => {
     console.error('pageerror', err);
     if (!watch) shutdown(1);
   });
@@ -58,6 +59,7 @@ export async function run (options = {}) {
     }
 
     console.log(text);
+    onMessage(text);
   });
 
   if (watch) {
@@ -74,17 +76,15 @@ export async function run (options = {}) {
         shutdown(code);
       })
       .catch(err => {
-        console.error(err);
-        shutdown(1);
+        shutdown(1, err);
       });
   }
 
   let firstRun = true;
 
-  webpack(config, (err, stats) => {
+  webpack(webpackConfig, (err, stats) => {
     if (err) {
-      console.error(err);
-      shutdown(1);
+      shutdown(1, err);
       return;
     }
 
@@ -97,22 +97,25 @@ export async function run (options = {}) {
     if (firstRun) {
       firstRun = false;
       page.goto(url).catch(err => {
-        console.error(err);
-        shutdown(1);
+        shutdown(1, err);
       });
     } else {
       page.reload().catch(err => {
-        console.error(err);
-        shutdown(1);
+        shutdown(1, err);
       });
     }
   });
 
-  async function shutdown (code = 0) {
+  async function shutdown (code = 0, err) {
+    await afterAll(err);
+
     if (browser) {
       await browser.close().catch(() => {});
     }
 
+    if (err) {
+      console.error(err);
+    }
     process.exit(code);
   }
 }

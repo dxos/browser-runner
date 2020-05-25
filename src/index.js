@@ -3,4 +3,4 @@
 //
 
 export * from './browser-runner';
-export * from './webpack-config';
+export * from './config';

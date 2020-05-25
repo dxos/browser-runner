@@ -2,7 +2,7 @@
 // Copyright 2020 DxOS.
 //
 
-import { promises as fs } from 'fs';
+import { promises as fs, constants } from 'fs';
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -12,14 +12,14 @@ import tempy from 'tempy';
 const resolve = async (file) => {
   try {
     const fullpath = path.resolve(file);
-    await fs.access(fullpath, fs.constants.F_OK);
+    await fs.access(fullpath, constants.F_OK);
     return fullpath;
   } catch (err) {
     return false;
   }
 };
 
-export async function readWebpackConfig (configPath = 'webpack.config.js') {
+export async function readConfig (configPath) {
   const result = await resolve(configPath);
   if (!result) {
     return;
@@ -29,7 +29,7 @@ export async function readWebpackConfig (configPath = 'webpack.config.js') {
 }
 
 export async function mergeWebpackConfig (options) {
-  const { src = './src/index.js', env = './.env', watch = false, userConfig = {} } = options;
+  const { src = './src/index.js', env = './.env', watch = false, webpackConfig = {} } = options;
 
   const envPath = (await resolve(env) || path.resolve(__dirname, '../.env.default'));
 
@@ -41,7 +41,7 @@ export async function mergeWebpackConfig (options) {
     watch,
     stats: 'errors-warnings',
     devtool: 'inline-source-map',
-    node: userConfig.node,
+    node: webpackConfig.node,
     plugins: [
       new Dotenv({
         path: envPath,
@@ -73,7 +73,7 @@ export async function mergeWebpackConfig (options) {
           </html>
         `
       }),
-      ...(userConfig.plugins || [])
+      ...(webpackConfig.plugins || [])
     ].filter(Boolean),
     module: {
       rules: [
@@ -86,7 +86,7 @@ export async function mergeWebpackConfig (options) {
           }
         },
 
-        ...(userConfig.module && userConfig.module.rules ? userConfig.module.rules : [])
+        ...(webpackConfig.module && webpackConfig.module.rules ? webpackConfig.module.rules : [])
       ]
     },
     output: {

@@ -7,7 +7,7 @@
 const path = require('path');
 const yargs = require('yargs');
 
-const { run, readWebpackConfig } = require('..');
+const { run, readConfig } = require('..');
 
 const argv = yargs
   .usage('$0 <file> [options] [puppeteerOptions]', 'runs the script', (yargs) => {
@@ -19,8 +19,9 @@ const argv = yargs
       .options({
         config: {
           alias: 'c',
-          describe: 'webpack config',
-          type: 'string'
+          describe: 'Browser runner config',
+          type: 'string',
+          default: 'browser-runner.config.js'
         },
         watch: {
           alias: 'w',
@@ -32,6 +33,11 @@ const argv = yargs
           describe: 'port to run',
           type: 'number'
         },
+        webpackConfig: {
+          describe: 'webpack config',
+          type: 'string',
+          default: 'webpack-config.js'
+        },
         env: {
           describe: 'env file',
           type: 'string'
@@ -41,14 +47,25 @@ const argv = yargs
   .argv;
 
 (async () => {
-  const { file, watch, port, env, config, ...puppeteerOptions } = argv;
+  const { file, config: configPath, watch, port, env, webpackConfig, ...puppeteerOptions } = argv;
 
-  await run({
+  const config = await readConfig(configPath);
+
+  let options = {
     src: path.resolve(file),
     watch,
-    userConfig: await readWebpackConfig(config),
+    webpackConfig: await readConfig(webpackConfig),
     port,
     env,
     puppeteerOptions
-  });
+  };
+
+  if (config) {
+    options = {
+      ...options,
+      ...config
+    };
+  }
+
+  await run(options);
 })();
