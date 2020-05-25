@@ -38,7 +38,7 @@ export async function run (options = {}) {
     await downloadBrowser(puppeteerOptions);
     browser = await puppeteer.launch(puppeteerOptions);
     page = await browser.newPage();
-    await beforeAll();
+    await beforeAll({ options, shutdown });
   } catch (err) {
     shutdown(1, err);
   }
@@ -75,8 +75,8 @@ export async function run (options = {}) {
       .then(code => {
         shutdown(code);
       })
-      .catch(err => {
-        shutdown(1, err);
+      .catch(() => {
+        // ignore
       });
   }
 
@@ -107,7 +107,11 @@ export async function run (options = {}) {
   });
 
   async function shutdown (code = 0, err) {
-    await afterAll(err);
+    try {
+      await afterAll(err);
+    } catch (err) {
+      console.error('afterAll error', err);
+    }
 
     if (browser) {
       await browser.close().catch(() => {});

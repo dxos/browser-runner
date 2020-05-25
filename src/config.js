@@ -41,7 +41,9 @@ export async function mergeWebpackConfig (options) {
     watch,
     stats: 'errors-warnings',
     devtool: 'inline-source-map',
-    node: webpackConfig.node,
+    node: webpackConfig.node || {
+      fs: 'empty'
+    },
     plugins: [
       new Dotenv({
         path: envPath,
