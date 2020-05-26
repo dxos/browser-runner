@@ -6,6 +6,7 @@ import webpack from 'webpack';
 import handler from 'serve-handler';
 import http from 'http';
 import puppeteer from 'puppeteer';
+import pLimit from 'p-limit';
 
 import { mergeWebpackConfig } from './config';
 import { downloadBrowser } from './download-browser';
@@ -25,7 +26,7 @@ async function createServer (outputPath, port) {
 const noop = () => {};
 
 export async function run (options = {}) {
-  const { port = 0, watch, beforeAll = noop, afterAll = noop, onMessage = noop, puppeteerOptions = {} } = options;
+  const { port = 0, watch, beforeAll = noop, afterAll = noop, onExecute = noop, onMessage = noop, puppeteerOptions = {} } = options;
 
   const webpackConfig = await mergeWebpackConfig(options);
   const server = await createServer(webpackConfig.output.path, port);
@@ -33,12 +34,13 @@ export async function run (options = {}) {
 
   let browser;
   let page;
+  const handlerArgs = { options, shutdown };
 
   try {
     await downloadBrowser(puppeteerOptions);
     browser = await puppeteer.launch(puppeteerOptions);
     page = await browser.newPage();
-    await beforeAll({ options, shutdown });
+    await beforeAll(handlerArgs);
   } catch (err) {
     shutdown(1, err);
   }
@@ -59,7 +61,7 @@ export async function run (options = {}) {
     }
 
     console.log(text);
-    onMessage(text);
+    onMessage(text, handlerArgs);
   });
 
   if (watch) {
@@ -81,8 +83,15 @@ export async function run (options = {}) {
   }
 
   let firstRun = true;
+  const limit = pLimit(1);
 
-  webpack(webpackConfig, (err, stats) => {
+  webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
+
+  async function executeScript (err, stats) {
+    if (limit.pendingCount > 1) {
+      limit.queue = limit.queue.slice(-1);
+    }
+
     if (err) {
       shutdown(1, err);
       return;
@@ -94,17 +103,19 @@ export async function run (options = {}) {
       return;
     }
 
-    if (firstRun) {
-      firstRun = false;
-      page.goto(url).catch(err => {
-        shutdown(1, err);
-      });
-    } else {
-      page.reload().catch(err => {
-        shutdown(1, err);
-      });
+    try {
+      if (firstRun) {
+        firstRun = false;
+        await onExecute(handlerArgs);
+        await page.goto(url);
+      } else {
+        await onExecute(handlerArgs);
+        await page.reload();
+      }
+    } catch (err) {
+      shutdown(1, err);
     }
-  });
+  }
 
   async function shutdown (code = 0, err) {
     try {
