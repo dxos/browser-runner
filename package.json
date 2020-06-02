@@ -1,6 +1,6 @@
 {
   "name": "@dxos/browser-runner",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0-beta.8",
   "description": "CLI to run JavaScript files into a headless browser.",
   "homepage": "https://github.com/dxos/browser-runner#readme",
   "bugs": {
