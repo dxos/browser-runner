@@ -28,6 +28,11 @@ const argv = yargs
           describe: 'watch',
           type: 'boolean'
         },
+        timeout: {
+          describe: 'timeout for the script',
+          type: 'number',
+          default: 30000
+        },
         port: {
           alias: 'p',
           describe: 'port to run',
@@ -47,13 +52,14 @@ const argv = yargs
   .argv;
 
 (async () => {
-  const { file, config: configPath, watch, port, env, webpackConfig, ...puppeteerOptions } = argv;
+  const { file, config: configPath, watch, timeout, port, env, webpackConfig, ...puppeteerOptions } = argv;
 
   const config = await readConfig(configPath);
 
   let options = {
     src: path.resolve(file),
     watch,
+    timeout,
     webpackConfig: await readConfig(webpackConfig),
     port,
     env,

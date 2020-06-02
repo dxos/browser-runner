@@ -26,7 +26,7 @@ async function createServer (outputPath, port) {
 const noop = () => {};
 
 export async function run (options = {}) {
-  const { port = 0, watch, beforeAll = noop, afterAll = noop, onExecute = noop, onMessage = noop, puppeteerOptions = {} } = options;
+  const { port = 0, watch, timeout = 30 * 1000, beforeAll = noop, afterAll = noop, onExecute = noop, onMessage = noop, puppeteerOptions = {} } = options;
 
   const webpackConfig = await mergeWebpackConfig(options);
   const server = await createServer(webpackConfig.output.path, port);
@@ -68,7 +68,7 @@ export async function run (options = {}) {
     console.log(`Running on: ${url}\n\n`);
   } else {
     page
-      .waitForFunction('window.exit !== undefined')
+      .waitForFunction('window.exit !== undefined', { timeout: watch ? 0 : timeout })
       .then(() => {
         return page.evaluate(() => {
           return window.exit;
@@ -77,8 +77,8 @@ export async function run (options = {}) {
       .then(code => {
         shutdown(code);
       })
-      .catch(() => {
-        // ignore
+      .catch((err) => {
+        shutdown(1, err);
       });
   }
 
