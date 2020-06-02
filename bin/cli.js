@@ -29,7 +29,7 @@ const argv = yargs
           type: 'boolean'
         },
         timeout: {
-          describe: 'timeout for the script',
+          describe: 'timeout for the script (0 for disabled)',
           type: 'number',
           default: 30000
         },
