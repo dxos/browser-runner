@@ -34,6 +34,7 @@ export async function run (options = {}) {
 
   let browser;
   let page;
+  let closed = false;
   const handlerArgs = { options, shutdown };
 
   try {
@@ -118,6 +119,9 @@ export async function run (options = {}) {
   }
 
   async function shutdown (code = 0, err) {
+    if (closed) return;
+    closed = true;
+
     try {
       await afterAll(err);
     } catch (err) {
