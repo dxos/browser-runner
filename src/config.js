@@ -51,12 +51,22 @@ export async function mergeWebpackConfig (options) {
       }),
       new InjectPlugin(() => {
         return `
+        const EventEmitter = require('events')
+
         if (!window.process) {
-          window.process = process || {}
+          window.process = process || new EventEmitter()
         }
 
         window.process.exit = (code = 0) => {
           window.exit = code
+        }
+
+        window.process.send = msg => {
+          window.__ipcSend(msg)
+        }
+
+        window.__ipcReceive = data => {
+          window.process.emit('message', data.type === 'Buffer' ? Buffer.from(data) : data)
         }
         `;
       }),
