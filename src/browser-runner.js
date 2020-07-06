@@ -68,15 +68,15 @@ export async function run (options = {}) {
 
   const eventEmitter = new EventEmitter();
   await page.exposeFunction('__ipcSend', msg => {
-    eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg)
-  })
-  await page.waitForFunction('() => window.__ipcSend != null')
+    eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg);
+  });
+  await page.waitForFunction('() => window.__ipcSend != null');
   eventEmitter.send = async msg => {
-    await page.waitForFunction('() => window.process !== undefined')
+    await page.waitForFunction('() => window.process !== undefined');
     page.evaluate((msg) => {
-      window.__ipcReceive(msg)
-    }, msg)
-  }
+      window.__ipcReceive(msg);
+    }, msg);
+  };
 
   if (watch) {
     console.log(`Running on: ${url}\n\n`);
