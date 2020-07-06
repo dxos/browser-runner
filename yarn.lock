@@ -3044,7 +3044,7 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-eventemitter3@^4.0.0, eventemitter3@^4.0.4:
+eventemitter3@^4.0.0:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.4.tgz#b5463ace635a083d018bdc7c917b4c5f10a85384"
   integrity sha512-rlaVLnVxtxvoyLsQQFBx53YmXHDxRIzzTLbdfxqi4yocpSjAxXwkU0cScM5JgSKMqEhrZpnvQ2D9gjylR0AimQ==
@@ -5817,13 +5817,6 @@ punycode@^2.1.0, punycode@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
-
-puppeteer-ipc@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-ipc/-/puppeteer-ipc-1.1.0.tgz#ada97c183418ef6856d606fa7a2b05ef91fa0f97"
-  integrity sha512-5A3qL2ol66RXGY0iIycjnx6zLb8vitofYfTKo0B/cWC6h41nIPlY3mVIA2+1FVTn7C1Fh25cTDNMV0JYfRv5Yw==
-  dependencies:
-    eventemitter3 "^4.0.4"
 
 puppeteer@^3.0.4:
   version "3.1.0"
