@@ -67,8 +67,19 @@ export async function run (options = {}) {
   });
 
   const eventEmitter = new EventEmitter();
-  await page.exposeFunction('__ipcSend', msg => { eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg) })
-  eventEmitter.send = msg => { console.log('br send' , msg); page.evaluate((msg) => { console.log('x', JSON.stringify(msg)); window.__ipcReceive(msg) }, msg) }
+  await page.exposeFunction('__ipcSend', msg => {
+    console.log('br receive', msg)
+    eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg)
+  })
+  await page.waitForFunction('() => window.__ipcSend != null')
+  eventEmitter.send = async msg => {
+    await page.waitForFunction('() => window.process !== undefined')
+    console.log('br send' , msg);
+    page.evaluate((msg) => {
+      console.log('x', JSON.stringify(msg));
+      window.__ipcReceive(msg)
+    }, msg)
+  }
 
   if (watch) {
     console.log(`Running on: ${url}\n\n`);
@@ -92,7 +103,6 @@ export async function run (options = {}) {
   const limit = pLimit(1);
 
   webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
-  await page.waitForFunction('window.process !== undefined')
 
   async function executeScript (err, stats) {
     if (limit.pendingCount > 1) {

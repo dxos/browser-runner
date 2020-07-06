@@ -53,9 +53,7 @@ export async function mergeWebpackConfig (options) {
         return `
         const EventEmitter = require('events')
 
-        if (!window.process) {
-          window.process = process || new EventEmitter()
-        }
+        window.process = new EventEmitter()
 
         window.process.exit = (code = 0) => {
           window.exit = code
