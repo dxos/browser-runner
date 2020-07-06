@@ -60,12 +60,10 @@ export async function mergeWebpackConfig (options) {
         }
 
         window.process.send = msg => {
-          console.log('peer send', JSON.stringify(msg))
           window.__ipcSend(msg)
         }
 
         window.__ipcReceive = data => {
-          console.log('peer receive', JSON.stringify(data))
           window.process.emit('message', data.type === 'Buffer' ? Buffer.from(data) : data)
         }
         `;

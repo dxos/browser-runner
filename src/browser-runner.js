@@ -68,15 +68,12 @@ export async function run (options = {}) {
 
   const eventEmitter = new EventEmitter();
   await page.exposeFunction('__ipcSend', msg => {
-    console.log('br receive', msg)
     eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg)
   })
   await page.waitForFunction('() => window.__ipcSend != null')
   eventEmitter.send = async msg => {
     await page.waitForFunction('() => window.process !== undefined')
-    console.log('br send' , msg);
     page.evaluate((msg) => {
-      console.log('x', JSON.stringify(msg));
       window.__ipcReceive(msg)
     }, msg)
   }
