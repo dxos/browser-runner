@@ -10,6 +10,7 @@ import pLimit from 'p-limit';
 
 import { mergeWebpackConfig } from './config';
 import { downloadBrowser } from './download-browser';
+import { EventEmitter } from 'events';
 
 async function createServer (outputPath, port) {
   const server = http.createServer((request, response) => {
@@ -64,6 +65,18 @@ export async function run (options = {}) {
     console.log(text);
     onMessage(text, handlerArgs);
   });
+
+  const eventEmitter = new EventEmitter();
+  await page.exposeFunction('__ipcSend', msg => {
+    eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg);
+  });
+  await page.waitForFunction('() => window.__ipcSend != null');
+  eventEmitter.send = async msg => {
+    await page.waitForFunction('() => window.process !== undefined');
+    page.evaluate((msg) => {
+      window.__ipcReceive(msg);
+    }, msg);
+  };
 
   if (watch) {
     console.log(`Running on: ${url}\n\n`);
@@ -137,4 +150,6 @@ export async function run (options = {}) {
     }
     process.exit(code);
   }
+
+  return eventEmitter;
 }
