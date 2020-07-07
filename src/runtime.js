@@ -1,5 +1,5 @@
 if (!window.process) {
-  window.process = {};
+  window.process = typeof process !== 'undefined' ? process : {};
 }
 
 window.process.exit = (code = 0) => {
