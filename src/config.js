@@ -2,7 +2,7 @@
 // Copyright 2020 DxOS.
 //
 
-import { promises as fs, constants } from 'fs';
+import { promises as fs, constants, readFileSync } from 'fs';
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -49,31 +49,7 @@ export async function mergeWebpackConfig (options) {
         path: envPath,
         systemvars: true
       }),
-      new InjectPlugin(() => {
-        return `
-        if(!window.process) {
-          window.process = {}
-        }
-
-        window.process.exit = (code = 0) => {
-          window.exit = code
-        }
-
-        const EventEmitter = require('events')
-        
-        const emitter = new EventEmitter();
-
-        window.process.on = (...args) => emitter.on(...args);
-
-        window.process.send = msg => {
-          window.__ipcSend(msg);
-        }
-
-        window.__ipcReceive = data => {
-          emitter.emit('message', data.type === 'Buffer' ? Buffer.from(data) : data);
-        }
-        `;
-      }),
+      new InjectPlugin(() => readFileSync(require.resolve('./runtime'), { encoding: 'utf-8' })),
       new HtmlWebpackPlugin({
         templateContent: `
           <!DOCTYPE html>
