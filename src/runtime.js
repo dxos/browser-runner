@@ -2,6 +2,8 @@ if (!window.process) {
   window.process = typeof process !== 'undefined' ? process : {};
 }
 
+window.process.argv = __process_argv; // eslint-disable-line
+
 window.process.exit = (code = 0) => {
   window.exit = code;
 };

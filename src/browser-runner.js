@@ -27,7 +27,17 @@ async function createServer (outputPath, port) {
 const noop = () => {};
 
 export async function run (options = {}) {
-  const { port = 0, watch, timeout = 30 * 1000, beforeAll = noop, afterAll = noop, onExecute = noop, onMessage = noop, puppeteerOptions = {} } = options;
+  const {
+    port = 0,
+    watch,
+    timeout = 30 * 1000,
+    beforeAll = noop,
+    afterAll = noop,
+    onExecute = noop,
+    onMessage = noop,
+    puppeteerOptions = {},
+    log = console.log
+  } = options;
 
   const webpackConfig = await mergeWebpackConfig(options);
   const server = await createServer(webpackConfig.output.path, port);
@@ -52,7 +62,7 @@ export async function run (options = {}) {
   });
 
   page.on('pageerror', err => {
-    console.error('pageerror', err);
+    log('pageerror', err);
     if (!watch) shutdown(1);
   });
 
@@ -62,7 +72,7 @@ export async function run (options = {}) {
       text = text.join(' ');
     }
 
-    console.log(text);
+    log(text);
     onMessage(text, handlerArgs);
   });
 
@@ -79,7 +89,7 @@ export async function run (options = {}) {
   };
 
   if (watch) {
-    console.log(`Running on: ${url}\n\n`);
+    log(`Running on: ${url}\n\n`);
   } else {
     page
       .waitForFunction('window.exit !== undefined', { timeout: watch ? 0 : timeout })
@@ -112,7 +122,7 @@ export async function run (options = {}) {
     }
 
     if (stats.hasErrors()) {
-      console.error(`${stats.toString({ chunks: false, colors: true })}`);
+      log(`${stats.toString({ chunks: false, colors: true })}`);
       if (!watch) shutdown(1);
       return;
     }
@@ -138,7 +148,7 @@ export async function run (options = {}) {
     try {
       await afterAll(err);
     } catch (err) {
-      console.error('afterAll error', err);
+      log('afterAll error', err);
     }
 
     if (browser) {
@@ -146,7 +156,7 @@ export async function run (options = {}) {
     }
 
     if (err) {
-      console.error(err);
+      log(err);
     }
     process.exit(code);
   }
