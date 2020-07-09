@@ -8,7 +8,7 @@ import Dotenv from 'dotenv-webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import InjectPlugin from 'webpack-inject-plugin';
 import tempy from 'tempy';
-import { DefinePlugin } from 'webpack'
+import { DefinePlugin } from 'webpack';
 
 const resolve = async (file) => {
   try {
@@ -52,7 +52,7 @@ export async function mergeWebpackConfig (options) {
       }),
       new InjectPlugin(() => readFileSync(require.resolve('./runtime'), { encoding: 'utf-8' })),
       new DefinePlugin({
-        __process_argv: JSON.stringify(['browser-runner', src, ...argv]),
+        __process_argv: JSON.stringify(['browser-runner', src, ...argv])
       }),
       new HtmlWebpackPlugin({
         templateContent: `

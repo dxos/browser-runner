@@ -36,7 +36,7 @@ export async function run (options = {}) {
     onExecute = noop,
     onMessage = noop,
     puppeteerOptions = {},
-    log = console.log,
+    log = console.log
   } = options;
 
   const webpackConfig = await mergeWebpackConfig(options);
