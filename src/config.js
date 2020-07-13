@@ -2,6 +2,7 @@
 // Copyright 2020 DxOS.
 //
 
+import assert from 'assert';
 import { promises as fs, constants, readFileSync } from 'fs';
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
@@ -30,9 +31,17 @@ export async function readConfig (configPath) {
 }
 
 export async function mergeWebpackConfig (options) {
-  const { src = './src/index.js', env = './.env', watch = false, webpackConfig = {}, argv = [] } = options;
+  const { src = './src/index.js', env = './.env', watch = false, webpackConfig = {}, argv = [], alias = [] } = options;
 
   const envPath = (await resolve(env) || path.resolve(__dirname, '../.env.default'));
+
+  const aliasMap = alias.reduce((prev, curr) => {
+    const [oldModule, newModule] = curr.split(':');
+    assert(oldModule);
+    assert(newModule);
+    prev[oldModule] = newModule.startsWith('./') ? path.resolve(process.cwd(), newModule) : newModule;
+    return prev;
+  }, {});
 
   return {
     mode: 'development',
@@ -44,6 +53,9 @@ export async function mergeWebpackConfig (options) {
     devtool: 'inline-source-map',
     node: webpackConfig.node || {
       fs: 'empty'
+    },
+    resolve: {
+      alias: aliasMap
     },
     plugins: [
       new Dotenv({

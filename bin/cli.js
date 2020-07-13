@@ -46,13 +46,17 @@ const argv = yargs
         env: {
           describe: 'env file',
           type: 'string'
+        },
+        alias: {
+          describe: 'alias modules/files',
+          type: 'array'
         }
       });
   })
   .argv;
 
 (async () => {
-  const { file, config: configPath, watch, timeout, port, env, webpackConfig, ...puppeteerOptions } = argv;
+  const { file, config: configPath, watch, timeout, port, env, webpackConfig, alias, ...puppeteerOptions } = argv;
 
   const config = await readConfig(configPath);
 
@@ -63,6 +67,7 @@ const argv = yargs
     webpackConfig: await readConfig(webpackConfig),
     port,
     env,
+    alias,
     puppeteerOptions
   };
 
