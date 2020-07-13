@@ -31,23 +31,23 @@ export class BrowserProcess extends EventEmitter {
   _page;
 
   /**
-   * @param {puppeteer.Page} page 
+   * @param {puppeteer.Page} page
    */
-  constructor(page) {
+  constructor (page) {
     super();
 
     this._page = page;
   }
 
-  async send(msg) {
+  async send (msg) {
     await this._page.waitForFunction('() => window.process !== undefined');
     this._page.evaluate((msg) => {
       window.__ipcReceive(msg);
     }, msg);
   }
 
-  async kill() {
-    await this._page.close()
+  async kill () {
+    await this._page.close();
   }
 }
 
