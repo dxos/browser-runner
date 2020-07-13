@@ -45,6 +45,10 @@ export class BrowserProcess extends EventEmitter {
       window.__ipcReceive(msg);
     }, msg);
   }
+
+  async kill() {
+    await this._page.close()
+  }
 }
 
 export async function run (options = {}) {
