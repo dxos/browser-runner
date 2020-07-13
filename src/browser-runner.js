@@ -26,6 +26,27 @@ async function createServer (outputPath, port) {
 
 const noop = () => {};
 
+export class BrowserProcess extends EventEmitter {
+  /** @type {puppeteer.Page} */
+  _page;
+
+  /**
+   * @param {puppeteer.Page} page 
+   */
+  constructor(page) {
+    super();
+
+    this._page = page;
+  }
+
+  async send(msg) {
+    await this._page.waitForFunction('() => window.process !== undefined');
+    this._page.evaluate((msg) => {
+      window.__ipcReceive(msg);
+    }, msg);
+  }
+}
+
 export async function run (options = {}) {
   const {
     port = 0,
@@ -76,17 +97,11 @@ export async function run (options = {}) {
     onMessage(text, handlerArgs);
   });
 
-  const eventEmitter = new EventEmitter();
+  const handle = new BrowserProcess(page);
   await page.exposeFunction('__ipcSend', msg => {
-    eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg);
+    handle.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg);
   });
   await page.waitForFunction('() => window.__ipcSend != null');
-  eventEmitter.send = async msg => {
-    await page.waitForFunction('() => window.process !== undefined');
-    page.evaluate((msg) => {
-      window.__ipcReceive(msg);
-    }, msg);
-  };
 
   if (watch) {
     log(`Running on: ${url}\n\n`);
@@ -161,5 +176,5 @@ export async function run (options = {}) {
     process.exit(code);
   }
 
-  return eventEmitter;
+  return handle;
 }
