@@ -166,7 +166,7 @@ export async function run (options = {}) {
     }
 
     if (watcher && watcher.close) {
-      await new Promise(resolve => watcher.close(() => resolve()))
+      await new Promise(resolve => watcher.close(() => resolve()));
     }
 
     if (err) {
