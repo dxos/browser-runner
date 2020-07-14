@@ -36,7 +36,8 @@ export async function run (options = {}) {
     onExecute = noop,
     onMessage = noop,
     puppeteerOptions = {},
-    log = console.log
+    log = console.log,
+    processExit = true
   } = options;
 
   const webpackConfig = await mergeWebpackConfig(options);
@@ -45,7 +46,10 @@ export async function run (options = {}) {
 
   let browser;
   let page;
-  let closed = false;
+
+  const eventEmitter = new EventEmitter();
+  eventEmitter.killed = false;
+
   const handlerArgs = { options, shutdown };
 
   try {
@@ -76,7 +80,6 @@ export async function run (options = {}) {
     onMessage(text, handlerArgs);
   });
 
-  const eventEmitter = new EventEmitter();
   await page.exposeFunction('__ipcSend', msg => {
     eventEmitter.emit('message', msg.type === 'Buffer' ? Buffer.from(msg) : msg);
   });
@@ -86,6 +89,9 @@ export async function run (options = {}) {
     page.evaluate((msg) => {
       window.__ipcReceive(msg);
     }, msg);
+  };
+  eventEmitter.cancel = () => {
+    shutdown();
   };
 
   if (watch) {
@@ -109,7 +115,7 @@ export async function run (options = {}) {
   let firstRun = true;
   const limit = pLimit(1);
 
-  webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
+  const watcher = webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
 
   async function executeScript (err, stats) {
     if (limit.pendingCount > 1) {
@@ -142,8 +148,8 @@ export async function run (options = {}) {
   }
 
   async function shutdown (code = 0, err) {
-    if (closed) return;
-    closed = true;
+    if (eventEmitter.killed) return;
+    eventEmitter.killed = true;
 
     try {
       await afterAll(err);
@@ -155,10 +161,21 @@ export async function run (options = {}) {
       await browser.close().catch(() => {});
     }
 
+    if (server) {
+      await new Promise(resolve => server.close(() => resolve()));
+    }
+
+    if (watcher && watcher.close) {
+      await new Promise(resolve => watcher.close(() => resolve()))
+    }
+
     if (err) {
       log(err);
     }
-    process.exit(code);
+
+    err && eventEmitter.emit('error', err);
+    eventEmitter.emit('close');
+    processExit && process.exit(code);
   }
 
   return eventEmitter;
