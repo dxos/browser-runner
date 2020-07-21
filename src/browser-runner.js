@@ -44,8 +44,9 @@ export async function run (options = {}) {
   const server = await createServer(webpackConfig.output.path, port);
   const url = `http://localhost:${server.address().port}`;
 
-  let browser;
-  let page;
+  let browser = null;
+  let page = null;
+  let watcher = null;
 
   const eventEmitter = new EventEmitter();
   eventEmitter.killed = false;
@@ -59,6 +60,7 @@ export async function run (options = {}) {
     await beforeAll(handlerArgs);
   } catch (err) {
     shutdown(1, err);
+    return;
   }
 
   page.on('error', err => {
@@ -115,7 +117,7 @@ export async function run (options = {}) {
   let firstRun = true;
   const limit = pLimit(1);
 
-  const watcher = webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
+  watcher = webpack(webpackConfig, (err, stats) => limit(() => executeScript(err, stats)));
 
   async function executeScript (err, stats) {
     if (limit.pendingCount > 1) {

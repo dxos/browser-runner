@@ -28,7 +28,7 @@
     "clean": "del-cli dist",
     "lint": "semistandard 'src/**/*.js'",
     "prepublishOnly": "npm run build && npm run test",
-    "test": "jest --verbose --passWithNoTests src",
+    "test": "node ./bin/cli test.js",
     "posttest": "npm run lint"
   },
   "browserslist": [
@@ -46,7 +46,7 @@
     "html-webpack-plugin": "^4.3.0",
     "http-server": "^0.12.3",
     "p-limit": "^2.3.0",
-    "puppeteer": "^3.0.4",
+    "puppeteer": "^5.2.1",
     "serve-handler": "^6.1.2",
     "source-map-support": "^0.5.12",
     "tempy": "^0.5.0",
@@ -65,7 +65,7 @@
     "cpy-cli": "^2.0.0",
     "del-cli": "^3.0.0",
     "jest": "^24.5.0",
-    "semistandard": "^14.2.0"
+    "semistandard": "14.2.0"
   },
   "publishConfig": {
     "access": "public"

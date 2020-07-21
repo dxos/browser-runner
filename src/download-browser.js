@@ -5,13 +5,13 @@
 import puppeteer from 'puppeteer';
 
 function getRevision (browserFetcher) {
-  const packageJSON = require('puppeteer/package.json');
+  const { PUPPETEER_REVISIONS } = require('puppeteer/lib/cjs/puppeteer/revisions');
   const product = browserFetcher.product();
 
   if (product === 'chrome') {
-    return `${process.env.PUPPETEER_CHROMIUM_REVISION || packageJSON.puppeteer.chromium_revision}`;
+    return `${process.env.PUPPETEER_CHROMIUM_REVISION || PUPPETEER_REVISIONS.chromium}`;
   } else if (product === 'firefox') {
-    return `${process.env.PUPPETEER_FIREFOX_REVISION || 78}`;
+    return `${process.env.PUPPETEER_FIREFOX_REVISION || PUPPETEER_REVISIONS.firefox}`;
   } else {
     throw new Error(`Unsupported product ${product}`);
   }
